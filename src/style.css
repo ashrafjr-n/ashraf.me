@@ -28,10 +28,343 @@
    Base
    =========================================================== */
 body {
-  background: var(--bg);
+  /* Wine glow lives on the body now (shows through the transparent canvas). */
+  background:
+    radial-gradient(120% 120% at 50% 40%, var(--surface) 0%, var(--bg) 60%) fixed,
+    var(--bg);
   color: var(--text);
   font-family: var(--font-code);
-  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* ===========================================================
+   Three.js background canvas
+   Sits above the page/hero background but below the name + HUD.
+   =========================================================== */
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  display: block;
+}
+
+/* ===========================================================
+   Depth world — fixed perspective stage for all sections.
+   Sits above the starfield (z:1), below overlays (z:20) and HUD (z:30).
+   =========================================================== */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  perspective: 1000px; /* keep in sync with PERSPECTIVE in depth.ts */
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+  pointer-events: none; /* individual items re-enable when they're up front */
+}
+
+/* A section in 3D depth. Centered; the depth engine drives transform/opacity. */
+.depth-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(92vw, 1100px);
+  transform: translate(-50%, -50%) translateZ(-1400px);
+  opacity: 0;
+  visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.depth-item--hero {
+  width: min(92vw, 900px);
+}
+
+/* The Hero content (name + tagline). */
+.hero__content {
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+/* Invisible element that generates scroll distance (no content pushes height). */
+.scroll-proxy {
+  width: 1px;
+  pointer-events: none;
+}
+
+.hero__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3rem, 9vw, 5.5rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.hero__tagline {
+  margin-top: 1.4rem;
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ---- Bottom-center scroll hint (fixed overlay, pulses) ---- */
+.hero__scroll-hint {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22; /* above overlays (20), below HUD (30) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  animation: hero-pulse 2.4s ease-in-out infinite;
+  transition: opacity 0.6s ease;
+}
+
+/* Fades out once the camera starts moving (toggled from the RAF loop).
+   Disable the pulse so the opacity transition wins. */
+.hero__scroll-hint.is-hidden {
+  animation: none;
+  opacity: 0;
+}
+
+.hero__scroll-label {
+  font-family: var(--font-code);
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.hero__scroll-line {
+  width: 1px;
+  height: 42px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+}
+
+@keyframes hero-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+
+/* Reduced motion: stop the pulse (the depth navigation itself stays). */
+@media (prefers-reduced-motion: reduce) {
+  .hero__scroll-hint {
+    animation: none;
+  }
+}
+
+/* ===========================================================
+   HUD overlay (fixed corners)
+   =========================================================== */
+.hud {
+  position: fixed;
+  inset: 2rem;
+  z-index: 30;
+  pointer-events: none;
+  font-family: var(--font-code);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.hud__item {
+  position: absolute;
+}
+
+.hud__item strong {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.hud__tl {
+  top: 0;
+  left: 0;
+}
+.hud__tr {
+  top: 0;
+  right: 0;
+}
+.hud__bl {
+  bottom: 0;
+  left: 0;
+}
+.hud__br {
+  bottom: 0;
+  right: 0;
+}
+
+/* ===========================================================
+   Cinematic overlay layers (full-screen, non-interactive)
+   =========================================================== */
+.fx-overlays {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.fx-overlays > * {
+  position: absolute;
+  inset: 0;
+}
+
+/* Subtle horizontal scanlines */
+.fx-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035) 0px,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+
+/* Film grain via fractalNoise SVG data-uri */
+.fx-noise {
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Vignette: clear center fading to black edges */
+.fx-vignette {
+  background: radial-gradient(
+    120% 120% at 50% 50%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* ===========================================================
+   Selected Work — project blocks (content of each depth item)
+   =========================================================== */
+.project {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+/* Even rows flip the columns: preview moves to the left. */
+.project--reverse .project__preview {
+  order: -1;
+}
+
+/* ---- Text column ---- */
+.project__num {
+  font-family: var(--font-code);
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.project__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  margin: 1rem 0 0.75rem;
+}
+
+.project__subtitle {
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.project__desc {
+  max-width: 42ch;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.project__tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.project__tag {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.35rem 0.7rem;
+}
+
+/* ---- Preview column ---- */
+.project__preview {
+  width: 100%;
+}
+
+.project__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.project__placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 3 / 4; /* tall, cinematic */
+  max-height: 56vh; /* keep the block within the viewport at the screen plane */
+  background: linear-gradient(160deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border);
+}
+
+.project__placeholder span {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ---- Narrow screens: stack to a single column ---- */
+@media (max-width: 820px) {
+  .project {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* Keep text above the preview regardless of row parity. */
+  .project--reverse .project__preview {
+    order: 0;
+  }
+
+  .project__placeholder {
+    aspect-ratio: 4 / 3;
+    max-height: 38vh;
+  }
 }
