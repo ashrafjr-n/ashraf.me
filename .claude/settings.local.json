@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(rm -f src/counter.ts)",
+      "Bash(rm -rf src/assets)",
+      "Bash(mkdir -p src/sections src/three src/lib)",
+      "Bash(touch src/sections/.gitkeep src/three/.gitkeep src/lib/.gitkeep)",
+      "Bash(grep -v '^\\\\.$')"
+    ]
+  }
+}
