@@ -1,3 +1,4 @@
+
 /* ===========================================================
    Design tokens — dark cinematic theme · RED + WINE palette
    (no purple anywhere)
@@ -99,7 +100,7 @@ body {
 .hero__name {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(3rem, 9vw, 5.5rem);
+  font-size: clamp(3rem, 9vw, 8.5rem);
   letter-spacing: 0.08em;
   line-height: 1;
   color: var(--text);
