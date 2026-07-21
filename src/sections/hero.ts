@@ -59,7 +59,7 @@ function buildHeroContent(): HTMLDivElement {
   const content = el('div', 'hero__content')
   content.append(
     el('h1', 'hero__name', 'ASHRAF'),
-    el('p', 'hero__tagline', 'Creative developer · cinematic web experiences'),
+    el('p', 'hero__tagline', 'Web developer · AI Engineer'),
   )
   return content
 }
