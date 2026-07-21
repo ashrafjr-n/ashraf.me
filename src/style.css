@@ -1,21 +1,45 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-/* ===========================================================
-   Design tokens — dark cinematic theme · RED + WINE palette
-   (no purple anywhere)
-   =========================================================== */
+/* Global Font */
 :root {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-code: "JetBrains Mono", monospace;
+
   --bg: #050505;
-  --surface: #140509;        /* deep wine surface */
+  --surface: #140509;
   --surface-2: #1f070d;
   --text: #e6e6e6;
   --text-dim: rgba(255, 255, 255, 0.5);
-  --accent: #ff1f3c;         /* electric red */
-  --accent-wine: #5c0a1e;    /* maroon */
+  --accent: #ff1f3c;
+  --accent-wine: #5c0a1e;
   --border: rgba(255, 255, 255, 0.1);
-  --font-display: 'Syncopate', sans-serif;
-  --font-code: 'JetBrains Mono', monospace;
 }
 
+html,
+body,
+#app {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
 /* ===========================================================
    Minimal reset
    =========================================================== */
