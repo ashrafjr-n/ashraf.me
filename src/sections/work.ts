@@ -40,9 +40,19 @@ function buildText(project: Project): HTMLDivElement {
   return text
 }
 
-/** Preview column: real image if present, else a styled placeholder box. */
-function buildPreview(project: Project): HTMLDivElement {
+/**
+ * Per-card tilt angles (degrees, clockwise). Slightly different for each card
+ * so the polaroids feel naturally scattered rather than machine-aligned.
+ */
+const TILTS = [4.5, 7, 3.5]
+
+/**
+ * Preview column: a polaroid-style frame — thick white border, portrait photo,
+ * a caption strip in the tall bottom margin, and a per-card tilt.
+ */
+function buildPreview(project: Project, index: number): HTMLDivElement {
   const preview = el('div', 'project__preview')
+  preview.style.setProperty('--tilt', `${TILTS[index % TILTS.length]}deg`)
 
   if (project.previewImg) {
     const img = el('img')
@@ -53,6 +63,8 @@ function buildPreview(project: Project): HTMLDivElement {
   } else {
     preview.append(el('div', 'project__placeholder', '<span>Project preview</span>'))
   }
+
+  preview.append(el('span', 'project__caption', `fig. ${project.num}`))
   return preview
 }
 
@@ -62,7 +74,7 @@ function buildProjectItem(project: Project, index: number): HTMLElement {
 
   const reverse = index % 2 === 1
   const article = el('article', `project${reverse ? ' project--reverse' : ''}`)
-  article.append(buildText(project), buildPreview(project))
+  article.append(buildText(project), buildPreview(project, index))
 
   item.append(article)
   return item

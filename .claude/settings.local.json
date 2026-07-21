@@ -13,7 +13,8 @@
       "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./node_modules/lenis/package.json'\\).exports,null,1\\)\\)\")",
       "Bash(node -e \"console.log\\(require\\('./node_modules/three/package.json'\\).version\\)\")",
       "Bash(node -e \"const p=require\\('./node_modules/gsap/package.json'\\); console.log\\(p.version\\); console.log\\(JSON.stringify\\(p.exports?.['.']||p.main\\)\\)\")",
-      "Bash(cd *)"
+      "Bash(cd *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
