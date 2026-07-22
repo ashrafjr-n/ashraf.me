@@ -123,10 +123,10 @@ body {
 
 .hero__name {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(3rem, 9vw, 8.5rem);
-  letter-spacing: 0.08em;
-  line-height: 1;
+  font-weight: 900;
+  font-size: clamp(3rem, 9vw, 9.5rem);
+  letter-spacing: 0.1em;
+  line-height: 0.9;
   color: var(--text);
 }
 
