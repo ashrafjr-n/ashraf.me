@@ -223,6 +223,41 @@ body {
   top: 0;
   left: 0;
 }
+.hud__github {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  pointer-events: auto; /* HUD parent has pointer-events:none, re-enable here */
+  cursor: pointer;
+  transition: color 0.25s ease, filter 0.25s ease;
+}
+
+.hud__github svg {
+  display: block;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.hud__github span {
+  letter-spacing: 0.12em;
+}
+
+.hud__github:hover,
+.hud__github:focus-visible {
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px rgba(255, 31, 60, 0.45));
+}
+
+.hud__github:hover svg,
+.hud__github:focus-visible svg {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.hud__github:active {
+  transform: translateY(1px);
+}
+
 .hud__tr {
   top: 0;
   right: 0;
